@@ -12,10 +12,7 @@ it requires you to play with a friend, particularly because some platforms only 
 > - Was used the Third person Template from Unreal Engine
 > - Network Connection (Server/Client)
 > - Improved on-air movement, allowing players to better control the character and land properly on the platform
-> - HUD widget
-> - Sound Fx's
-> - AI Behavior using Behavior tree and BlackBoard
-> - Additional bullet spread was also implemented using the FMath library from C++
+> - GameInstance
 
-- Here is a link to a [video](https://drive.google.com/file/d/1w6okmhePdC4LnyNggRSMaCoIHRCuKRnf/view) of this project.
+<!--- Here is a link to a [video](https://drive.google.com/file/d/1w6okmhePdC4LnyNggRSMaCoIHRCuKRnf/view) of this project. --->
 - Here is a link to my [Portfolio](https://wandin.github.io/portfoliogithub.io/)
