@@ -20,7 +20,10 @@ public:
 	
 	
 	virtual void Init();
-	
+
+	UFUNCTION(BlueprintCallable)
+	void LoadMenu();
+
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
 	void Host();
@@ -28,4 +31,9 @@ public:
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
 	void Join(const FString& Address);
+
+
+private:
+
+	TSubclassOf<class UUserWidget> MenuClass;
 };

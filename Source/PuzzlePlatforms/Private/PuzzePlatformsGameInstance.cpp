@@ -4,16 +4,55 @@
 #include "PuzzePlatformsGameInstance.h"
 
 #include "Engine/Engine.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Blueprint/UserWidget.h"
+
+#include "PlatformTrigger.h"
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance CONSTRUCTOR version!"));
+	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MainMenu"));
+	if (!ensure(MenuBPClass.Class != nullptr))
+	{
+		return;
+	}
+
+	MenuClass = MenuBPClass.Class;
 }
 
 void UPuzzePlatformsGameInstance::Init()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance INIT version!"));
+	UE_LOG(LogTemp, Warning, TEXT("Found Class %s"), *MenuClass->GetName());
 }
+
+void UPuzzePlatformsGameInstance::LoadMenu()
+{
+	if (!ensure(MenuClass != nullptr))
+	{
+		return;
+	}
+
+	UUserWidget* Menu = CreateWidget<UUserWidget>(this, MenuClass);
+	if (!ensure(Menu != nullptr))
+	{
+		return;
+	}
+
+	Menu->AddToViewport();
+
+	/* Enables controller to be able to click on the menu*/
+	APlayerController* PC = GetFirstLocalPlayerController();
+	if (!ensure(PC != nullptr)) return;
+
+	FInputModeUIOnly InputModeData;
+	InputModeData.SetWidgetToFocus(Menu->TakeWidget());
+	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+	PC->SetInputMode(InputModeData);
+
+	/* make the cursor visible */
+	PC->bShowMouseCursor = true;
+}	
 
 void UPuzzePlatformsGameInstance::Host()
 {
