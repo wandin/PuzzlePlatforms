@@ -68,35 +68,8 @@ void APuzzlePlatformsCharacter::SetupPlayerInputComponent(class UInputComponent*
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &APuzzlePlatformsCharacter::LookUpAtRate);
 
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &APuzzlePlatformsCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &APuzzlePlatformsCharacter::TouchStopped);
-
-	// VR headset functionality
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &APuzzlePlatformsCharacter::OnResetVR);
 }
 
-
-void APuzzlePlatformsCharacter::OnResetVR()
-{
-	// If PuzzlePlatforms is added to a project via 'Add Feature' in the Unreal Editor the dependency on HeadMountedDisplay in PuzzlePlatforms.Build.cs is not automatically propagated
-	// and a linker error will result.
-	// You will need to either:
-	//		Add "HeadMountedDisplay" to [YourProject].Build.cs PublicDependencyModuleNames in order to build successfully (appropriate if supporting VR).
-	// or:
-	//		Comment or delete the call to ResetOrientationAndPosition below (appropriate if not supporting VR)
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void APuzzlePlatformsCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		Jump();
-}
-
-void APuzzlePlatformsCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		StopJumping();
-}
 
 void APuzzlePlatformsCharacter::TurnAtRate(float Rate)
 {
