@@ -4,19 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "PuzzlePlatforms/MenuSystem/MenuInterface.h"
 #include "PuzzePlatformsGameInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PUZZLEPLATFORMS_API UPuzzePlatformsGameInstance : public UGameInstance
+class PUZZLEPLATFORMS_API UPuzzePlatformsGameInstance : public UGameInstance, public IMenuInterface
 {
 	GENERATED_BODY()
 
 public:
 	
-	UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer);
+	UPuzzePlatformsGameInstance(const FObjectInitializer & ObjectInitializer);
 	
 	
 	virtual void Init();
@@ -26,7 +27,7 @@ public:
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
-	void Host();
+	void Host() override;
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
@@ -34,6 +35,8 @@ public:
 
 
 private:
-
 	TSubclassOf<class UUserWidget> MenuClass;
+
+	class UMainMenu* Menu;
+
 };

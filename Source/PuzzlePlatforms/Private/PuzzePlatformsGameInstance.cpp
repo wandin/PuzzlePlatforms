@@ -3,11 +3,16 @@
 
 #include "PuzzePlatformsGameInstance.h"
 
+
+
 #include "Engine/Engine.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
 
 #include "PlatformTrigger.h"
+#include "PuzzlePlatforms/MenuSystem/MainMenu.h"
+
+
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -27,36 +32,22 @@ void UPuzzePlatformsGameInstance::Init()
 
 void UPuzzePlatformsGameInstance::LoadMenu()
 {
-	if (!ensure(MenuClass != nullptr))
-	{
-		return;
-	}
+	if (!ensure(MenuClass != nullptr)) return;
 
-	UUserWidget* Menu = CreateWidget<UUserWidget>(this, MenuClass);
-	if (!ensure(Menu != nullptr))
-	{
-		return;
-	}
+	Menu = CreateWidget<UMainMenu>(this, MenuClass);
+	if (!ensure(Menu != nullptr)) return;
 
-	Menu->AddToViewport();
-
-	/* Enables controller to be able to click on the menu*/
-	APlayerController* PC = GetFirstLocalPlayerController();
-	if (!ensure(PC != nullptr)) return;
-
-	FInputModeUIOnly InputModeData;
-	InputModeData.SetWidgetToFocus(Menu->TakeWidget());
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-	PC->SetInputMode(InputModeData);
-
-	/* make the cursor visible */
-	PC->bShowMouseCursor = true;
-}	
+	Menu->Setup();
+	Menu->SetMenuInterface(this);
+}
 
 void UPuzzePlatformsGameInstance::Host()
 {
-
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+	
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
