@@ -19,11 +19,13 @@ public:
 	
 	UPuzzePlatformsGameInstance(const FObjectInitializer & ObjectInitializer);
 	
-	
 	virtual void Init();
 
 	UFUNCTION(BlueprintCallable)
 	void LoadMenu();
+
+	UFUNCTION(BlueprintCallable)
+	void InGameLoadMenu();
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
@@ -31,12 +33,13 @@ public:
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
-	void Join(const FString& Address);
+	void Join(const FString& Address) override;
 
+	virtual void LoadMainMenu() override;
 
 private:
 	TSubclassOf<class UUserWidget> MenuClass;
+	TSubclassOf<class UUserWidget> InGameMenuClass;
 
-	class UMainMenu* Menu;
-
+	class UMainMenu* _Menu;
 };

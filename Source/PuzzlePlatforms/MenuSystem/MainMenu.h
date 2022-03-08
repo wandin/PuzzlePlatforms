@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "MenuInterface.h"
-#include "Components/WidgetSwitcher.h"
+#include "MenuWidget.h"
 #include "MainMenu.generated.h"
 
 
@@ -13,15 +11,9 @@
  * 
  */
 UCLASS()
-class PUZZLEPLATFORMS_API UMainMenu : public UUserWidget
+class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 {
 	GENERATED_BODY()
-public:
-
-	void SetMenuInterface(IMenuInterface* _MenuInterface);
-
-	void Setup();
-	void Teardown();
 
 protected:
 
@@ -39,6 +31,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelJoinMenuButton;
 
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinGameButton;
+
 	/* declaring the Widget Switcher for switching widgets when Join button is clicked*/
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
@@ -51,9 +46,15 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* JoinMenu;
 
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* IPAddressField;
+
 
 	UFUNCTION()
 	void HostServer();
+
+	UFUNCTION()
+	void JoinServer();
 
 	UFUNCTION()
 	void OpenJoinMenu();
@@ -61,6 +62,4 @@ private:
 	UFUNCTION()
 	void OpenMainMenu();
 
-
-	IMenuInterface* MenuInterface;
 };

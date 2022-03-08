@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PuzzePlatformsGameInstance.h"
-
-
 
 #include "Engine/Engine.h"
 #include "UObject/ConstructorHelpers.h"
@@ -11,18 +8,20 @@
 
 #include "PlatformTrigger.h"
 #include "PuzzlePlatforms/MenuSystem/MainMenu.h"
-
+#include "PuzzlePlatforms/MenuSystem/MenuWidget.h"
 
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MainMenu"));
-	if (!ensure(MenuBPClass.Class != nullptr))
-	{
-		return;
-	}
-
+	if (!ensure(MenuBPClass.Class != nullptr)) return;
 	MenuClass = MenuBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
+	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
+
+	InGameMenuClass = InGameMenuBPClass.Class;
+
 }
 
 void UPuzzePlatformsGameInstance::Init()
@@ -34,18 +33,29 @@ void UPuzzePlatformsGameInstance::LoadMenu()
 {
 	if (!ensure(MenuClass != nullptr)) return;
 
-	Menu = CreateWidget<UMainMenu>(this, MenuClass);
-	if (!ensure(Menu != nullptr)) return;
+	_Menu = CreateWidget<UMainMenu>(this, MenuClass);
+	if (!ensure(_Menu != nullptr)) return;
 
-	Menu->Setup();
-	Menu->SetMenuInterface(this);
+	_Menu->Setup();
+	_Menu->SetMenuInterface(this);
+}
+
+void UPuzzePlatformsGameInstance::InGameLoadMenu()
+{
+	if (!ensure(InGameMenuClass != nullptr)) return;
+
+	UMenuWidget* _Menu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
+	if (!ensure(_Menu != nullptr)) return;
+
+	_Menu->Setup();
+	_Menu->SetMenuInterface(this);
 }
 
 void UPuzzePlatformsGameInstance::Host()
 {
-	if (Menu != nullptr)
+	if (_Menu != nullptr)
 	{
-		Menu->Teardown();
+		_Menu->Teardown();
 	}
 	
 	UEngine* Engine = GetEngine();
@@ -61,6 +71,11 @@ void UPuzzePlatformsGameInstance::Host()
 
 void UPuzzePlatformsGameInstance::Join(const FString& Address)
 {
+	if (_Menu != nullptr)
+	{
+		_Menu->Teardown();
+	}
+	
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
@@ -70,4 +85,12 @@ void UPuzzePlatformsGameInstance::Join(const FString& Address)
 	if (!ensure(PC != nullptr)) return;
 
 	PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+}
+
+void UPuzzePlatformsGameInstance::LoadMainMenu()
+{
+	APlayerController* PC = GetFirstLocalPlayerController();
+	if (!ensure(PC != nullptr)) return;
+
+	PC->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }
