@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuInterface.h"
+#include "Components/WidgetSwitcher.h"
 #include "MainMenu.generated.h"
 
 
@@ -28,15 +29,38 @@ protected:
 
 private:
 
+	/* declaring Buttons on Widget created in UE*/
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Host;
+	class UButton* HostButton;
+	/* declaring Buttons on Widget created in UE*/
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Join;
+	class UButton* CancelJoinMenuButton;
+
+	/* declaring the Widget Switcher for switching widgets when Join button is clicked*/
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MenuSwitcher;
+
+	/* declaring the Main Menu, which will open using the WidgetSwitcher when the CancelJoinMenuButton is clicked*/
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* MainMenu;
+
+	/* declaring the Join Menu, which will open using the WidgetSwitcher when the Joinbutton is clicked*/
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* JoinMenu;
 
 
 	UFUNCTION()
 	void HostServer();
+
+	UFUNCTION()
+	void OpenJoinMenu();
+
+	UFUNCTION()
+	void OpenMainMenu();
+
 
 	IMenuInterface* MenuInterface;
 };

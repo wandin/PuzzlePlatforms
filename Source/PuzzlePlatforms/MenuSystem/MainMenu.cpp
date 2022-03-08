@@ -4,6 +4,7 @@
 #include "MainMenu.h"
 
 #include "Components/Button.h"
+#include "Components/WidgetSwitcher.h"
 
 bool UMainMenu::Initialize()
 {
@@ -14,16 +15,24 @@ bool UMainMenu::Initialize()
 		return false;
 	}
 
-	if (!ensure(Host != nullptr))
-	{
-		return false;
-	}
-
-	Host->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
-
+	if (!ensure(HostButton != nullptr)) return false;
+	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
 		return true;
+
+	if (!ensure(JoinButton != nullptr)) return false;
+	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
+	return true;
+
+	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
+	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+	return true;
 }
 
+void UMainMenu::SetMenuInterface(IMenuInterface* _MenuInterface)
+{
+	// Injecting dependencies from the GameInstance's functions Host and Join, to our MainMenu file.
+	this->MenuInterface = _MenuInterface;
+}
 
 void UMainMenu::Setup()
 {
@@ -62,16 +71,27 @@ void UMainMenu::Teardown()
 	PC->bShowMouseCursor = false;
 }
 
-void UMainMenu::SetMenuInterface(IMenuInterface* _MenuInterface)
-{
-	// Injecting dependencies from the GameInstance's functions Host and Join, to our MainMenu file.
-	this->MenuInterface = _MenuInterface;
-}
-
 void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
 	{
 		MenuInterface->Host();
 	}
+}
+
+void UMainMenu::OpenJoinMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(JoinMenu != nullptr)) return;
+
+	MenuSwitcher->SetActiveWidgetIndex(1);
+
+}
+
+void UMainMenu::OpenMainMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(CancelJoinMenuButton != nullptr)) return;
+
+	MenuSwitcher->SetActiveWidget(MainMenu);
 }
