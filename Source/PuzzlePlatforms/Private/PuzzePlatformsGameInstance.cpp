@@ -61,6 +61,11 @@ void UPuzzePlatformsGameInstance::Host()
 
 void UPuzzePlatformsGameInstance::Join(const FString& Address)
 {
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 

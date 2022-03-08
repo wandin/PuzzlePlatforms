@@ -5,6 +5,8 @@
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/EditableTextBox.h"
+
 
 bool UMainMenu::Initialize()
 {
@@ -20,9 +22,13 @@ bool UMainMenu::Initialize()
 
 	if (!ensure(JoinButton != nullptr)) return false;
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
-
+	
 	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
 	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
+	if (!ensure(JoinGameButton != nullptr)) return false;
+	JoinGameButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
+
 	return true;
 }
 
@@ -32,6 +38,7 @@ void UMainMenu::SetMenuInterface(IMenuInterface* _MenuInterface)
 	this->MenuInterface = _MenuInterface;
 }
 
+/* Setup Menu Widget*/
 void UMainMenu::Setup()
 {
 	this->AddToViewport();
@@ -52,6 +59,7 @@ void UMainMenu::Setup()
 	PC->bShowMouseCursor = true;
 }
 
+/* TearDown the Menu Widget */
 void UMainMenu::Teardown()
 {
 	this->RemoveFromViewport();
@@ -69,6 +77,7 @@ void UMainMenu::Teardown()
 	PC->bShowMouseCursor = false;
 }
 
+/* Host a Server once the Host Button from the MainMenu is clicked*/
 void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
@@ -77,6 +86,7 @@ void UMainMenu::HostServer()
 	}
 }
 
+/* Open the JoinMenu once the Join Button from the MainMenu is clicked*/
 void UMainMenu::OpenJoinMenu()
 {
 	if (!ensure(MenuSwitcher != nullptr)) return;
@@ -88,10 +98,23 @@ void UMainMenu::OpenJoinMenu()
 
 }
 
+/* Open the MainMenu once the Cancel Button from the JoinMenu is clicked*/
 void UMainMenu::OpenMainMenu()
 {
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(CancelJoinMenuButton != nullptr)) return;
 
 	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+/* Join Server with a IP address */
+void UMainMenu::JoinServer()
+{
+	if (MenuInterface != nullptr)
+	{
+		if (!ensure(IPAddressField != nullptr)) return;
+
+		const FString& Address = IPAddressField->GetText().ToString();
+		MenuInterface->Join(Address);
+	}
 }
