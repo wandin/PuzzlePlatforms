@@ -28,6 +28,10 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 
+	/* declaring Buttons on Widget created in UE*/
+	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitGameButton;
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* CancelJoinMenuButton;
 
@@ -61,5 +65,8 @@ private:
 
 	UFUNCTION()
 	void OpenMainMenu();
+
+	UFUNCTION()
+	void ExitGame();
 
 };
