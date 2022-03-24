@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
+#include "OnlineSubsystem.h"
 
 #include "PlatformTrigger.h"
 #include "PuzzlePlatforms/MenuSystem/MainMenu.h"
@@ -26,7 +27,20 @@ UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitialize
 
 void UPuzzePlatformsGameInstance::Init()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Found Class %s"), *MenuClass->GetName());
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (Subsystem != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found Subsystem %s"), *Subsystem->GetSubsystemName().ToString());
+		IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+		if (SessionInterface.IsValid()) //boolean check
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found Session Interface"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found no Subsystem"));
+	}
 }
 
 void UPuzzePlatformsGameInstance::LoadMenu()
