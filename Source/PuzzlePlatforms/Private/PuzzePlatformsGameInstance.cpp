@@ -6,11 +6,15 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 
 #include "PlatformTrigger.h"
 #include "PuzzlePlatforms/MenuSystem/MainMenu.h"
 #include "PuzzlePlatforms/MenuSystem/MenuWidget.h"
 
+
+const static FName SESSION_NAME = TEXT("My Session"); // declares the Session name, pretty obvious
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -31,10 +35,14 @@ void UPuzzePlatformsGameInstance::Init()
 	if (Subsystem != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found Subsystem %s"), *Subsystem->GetSubsystemName().ToString());
-		IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
-		if (SessionInterface.IsValid()) //boolean check
+		SessionInterface = Subsystem->GetSessionInterface();
+		if (SessionInterface.IsValid()) //boolean check for shared pointer IOnlineSessionPtr
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Found Session Interface"));
+			FOnlineSessionSettings SessionSettings;
+			SessionInterface->CreateSession(0, TEXT("My Session"), SessionSettings);
+			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnCreateSessionComplete); // creates session
+			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnDestroySessionComplete); // destroys session
+
 		}
 	}
 	else
@@ -65,13 +73,36 @@ void UPuzzePlatformsGameInstance::InGameLoadMenu()
 	_Menu->SetMenuInterface(this);
 }
 
+// When pressing HostButton, creates a session(SESSION_NAME) "My Session", if a session already exists destroys the session and creates one
 void UPuzzePlatformsGameInstance::Host()
 {
+	if (SessionInterface.IsValid()) //boolean
+	{
+		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
+		if (ExistingSession != nullptr)
+		{
+			SessionInterface->DestroySession(SESSION_NAME); // Destroy Session, if a session is already created.
+		}
+		else
+		{
+			CreateSession();
+		}
+	}
+}
+
+// if CreatesSession works, then opens the level
+void UPuzzePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bool Succeded)
+{
+	if (!Succeded)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not create My Session"));
+		return;
+	}
 	if (_Menu != nullptr)
 	{
 		_Menu->Teardown();
 	}
-	
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
@@ -81,6 +112,25 @@ void UPuzzePlatformsGameInstance::Host()
 	if (!ensure(World != nullptr)) return;
 
 	World->ServerTravel("/Game/PuzzlePlatforms/Maps/PuzzlePlatformLevel?listen");
+}
+
+// After Destroy Session, creates a session.
+void UPuzzePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, bool Succeded)
+{
+	if(Succeded)
+	{
+		CreateSession();
+	}
+}
+
+// CREATE SESSION
+void UPuzzePlatformsGameInstance::CreateSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		FOnlineSessionSettings SessionSettings;
+		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
+	}
 }
 
 void UPuzzePlatformsGameInstance::Join(const FString& Address)
