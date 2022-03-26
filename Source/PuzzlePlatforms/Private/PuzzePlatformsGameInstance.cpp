@@ -44,14 +44,6 @@ void UPuzzePlatformsGameInstance::Init()
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnDestroySessionComplete);
 			// Find Session
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnFindSessionComplete);
-
-			SessionSearch = MakeShareable(new FOnlineSessionSearch());
-			if (SessionSearch.IsValid())
-			{
-				SessionSearch->bIsLanQuery = true;
-				UE_LOG(LogTemp, Warning, TEXT("Starting find Session"));
-				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-			}
 		}
 	}
 	else
@@ -132,16 +124,32 @@ void UPuzzePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, bo
 	}
 }
 
+void UPuzzePlatformsGameInstance::RefreshServerList()
+{
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	if (SessionSearch.IsValid())
+	{
+		SessionSearch->bIsLanQuery = true;
+		UE_LOG(LogTemp, Warning, TEXT("Starting find Session"));
+		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	}
+}
+
 void UPuzzePlatformsGameInstance::OnFindSessionComplete(bool Succeded)
 {
-		if (Succeded && SessionSearch.IsValid())
+		if (Succeded && SessionSearch.IsValid() && _Menu != nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Finished finding Session"));
+
+			TArray<FString> ServerNames;
 
 			for (auto& SearchResult : SessionSearch->SearchResults) // iterates trhough the Sessions found
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Found Session Names: %s"), *SearchResult.GetSessionIdStr());
+				ServerNames.Add(SearchResult.GetSessionIdStr());
 			}
+
+			_Menu->SetServerList(ServerNames);
 		}
 }
 
@@ -164,18 +172,19 @@ void UPuzzePlatformsGameInstance::Join(const FString& Address)
 {
 	if (_Menu != nullptr)
 	{
-		_Menu->Teardown();
+		//_Menu->SetServerList({ "Test 1", "Test 2" });
+		//_Menu->Teardown();
 	}
-	
-	UEngine* Engine = GetEngine();
-	if (!ensure(Engine != nullptr)) return;
+	//
+	//UEngine* Engine = GetEngine();
+	//if (!ensure(Engine != nullptr)) return;
 
-	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+	//Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
 
-	APlayerController* PC = GetFirstLocalPlayerController();
-	if (!ensure(PC != nullptr)) return;
+	//APlayerController* PC = GetFirstLocalPlayerController();
+	//if (!ensure(PC != nullptr)) return;
 
-	PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+	//PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }
 
 void UPuzzePlatformsGameInstance::LoadMainMenu()
@@ -185,3 +194,5 @@ void UPuzzePlatformsGameInstance::LoadMainMenu()
 
 	PC->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }
+
+
