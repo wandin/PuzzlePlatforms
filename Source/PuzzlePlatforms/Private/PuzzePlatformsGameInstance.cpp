@@ -38,11 +38,20 @@ void UPuzzePlatformsGameInstance::Init()
 		SessionInterface = Subsystem->GetSessionInterface();
 		if (SessionInterface.IsValid()) //boolean check for shared pointer IOnlineSessionPtr
 		{
-			FOnlineSessionSettings SessionSettings;
-			SessionInterface->CreateSession(0, TEXT("My Session"), SessionSettings);
-			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnCreateSessionComplete); // creates session
-			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnDestroySessionComplete); // destroys session
+			// creates session
+			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnCreateSessionComplete); 
+			// destroys session
+			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnDestroySessionComplete);
+			// Find Session
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnFindSessionComplete);
 
+			SessionSearch = MakeShareable(new FOnlineSessionSearch());
+			if (SessionSearch.IsValid())
+			{
+				SessionSearch->bIsLanQuery = true;
+				UE_LOG(LogTemp, Warning, TEXT("Starting find Session"));
+				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+			}
 		}
 	}
 	else
@@ -123,12 +132,30 @@ void UPuzzePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, bo
 	}
 }
 
+void UPuzzePlatformsGameInstance::OnFindSessionComplete(bool Succeded)
+{
+		if (Succeded && SessionSearch.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Finished finding Session"));
+
+			for (auto& SearchResult : SessionSearch->SearchResults) // iterates trhough the Sessions found
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Found Session Names: %s"), *SearchResult.GetSessionIdStr());
+			}
+		}
+}
+
 // CREATE SESSION
 void UPuzzePlatformsGameInstance::CreateSession()
 {
 	if (SessionInterface.IsValid())
 	{
 		FOnlineSessionSettings SessionSettings;
+		SessionSettings.bIsLANMatch = true;
+		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.bShouldAdvertise = true;
+
+
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
 	}
 }
