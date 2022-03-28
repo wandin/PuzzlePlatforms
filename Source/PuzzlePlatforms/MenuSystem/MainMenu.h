@@ -20,6 +20,8 @@ public:
 
 	void SetServerList(TArray<FString> ServerNames);
 
+	void SelectIndex(uint32 Index);
+
 protected:
 
 	virtual bool Initialize() override;
@@ -59,6 +61,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UPanelWidget* ServerList;
+
+	
+	TOptional<uint32> SelectedIndex;
 
 
 	UFUNCTION()

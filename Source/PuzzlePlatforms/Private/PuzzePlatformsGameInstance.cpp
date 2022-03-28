@@ -7,7 +7,6 @@
 #include "Blueprint/UserWidget.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
-#include "Interfaces/OnlineSessionInterface.h"
 
 #include "PlatformTrigger.h"
 #include "PuzzlePlatforms/MenuSystem/MainMenu.h"
@@ -44,6 +43,8 @@ void UPuzzePlatformsGameInstance::Init()
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnDestroySessionComplete);
 			// Find Session
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnFindSessionComplete);
+			// Joining Session using server button Index from menu
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UPuzzePlatformsGameInstance::OnJoinSessionComplete);
 		}
 	}
 	else
@@ -168,23 +169,40 @@ void UPuzzePlatformsGameInstance::CreateSession()
 	}
 }
 
-void UPuzzePlatformsGameInstance::Join(const FString& Address)
+void UPuzzePlatformsGameInstance::Join(uint32 Index)
 {
+	if (!SessionInterface.IsValid()) return;
+	if (!SessionSearch.IsValid()) return;
+
 	if (_Menu != nullptr)
 	{
-		//_Menu->SetServerList({ "Test 1", "Test 2" });
-		//_Menu->Teardown();
+		_Menu->Teardown();
 	}
-	//
-	//UEngine* Engine = GetEngine();
-	//if (!ensure(Engine != nullptr)) return;
 
-	//Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+	SessionInterface->JoinSession(0, SESSION_NAME, SessionSearch->SearchResults[Index]);
 
-	//APlayerController* PC = GetFirstLocalPlayerController();
-	//if (!ensure(PC != nullptr)) return;
+}
 
-	//PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+void UPuzzePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (!SessionInterface.IsValid()) return;
+
+	FString Address;
+	if (!SessionInterface->GetResolvedConnectString(SessionName, Address))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not get connect string"));
+		return;
+	}
+
+	UEngine* Engine = GetEngine();
+	if (!ensure(Engine != nullptr)) return;
+
+	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
+
+	APlayerController* PC = GetFirstLocalPlayerController();
+	if (!ensure(PC != nullptr)) return;
+
+	PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }
 
 void UPuzzePlatformsGameInstance::LoadMainMenu()
