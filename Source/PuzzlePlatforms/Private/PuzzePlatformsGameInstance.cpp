@@ -92,6 +92,22 @@ void UPuzzePlatformsGameInstance::Host()
 	}
 }
 
+// CREATE SESSION
+void UPuzzePlatformsGameInstance::CreateSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		FOnlineSessionSettings SessionSettings;
+		SessionSettings.bIsLANMatch = true;
+		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.bShouldAdvertise = true;
+		SessionSettings.bUsesPresence = true;
+
+
+		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
+	}
+}
+
 // if CreatesSession works, then opens the level
 void UPuzzePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bool Succeded)
 {
@@ -131,8 +147,13 @@ void UPuzzePlatformsGameInstance::RefreshServerList()
 	if (SessionSearch.IsValid())
 	{
 		SessionSearch->bIsLanQuery = true;
+
+		SessionSearch->MaxSearchResults = 100;
+		// Search player presences in session
+		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 		UE_LOG(LogTemp, Warning, TEXT("Starting find Session"));
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+		
 	}
 }
 
@@ -152,21 +173,6 @@ void UPuzzePlatformsGameInstance::OnFindSessionComplete(bool Succeded)
 
 			_Menu->SetServerList(ServerNames);
 		}
-}
-
-// CREATE SESSION
-void UPuzzePlatformsGameInstance::CreateSession()
-{
-	if (SessionInterface.IsValid())
-	{
-		FOnlineSessionSettings SessionSettings;
-		SessionSettings.bIsLANMatch = true;
-		SessionSettings.NumPublicConnections = 2;
-		SessionSettings.bShouldAdvertise = true;
-
-
-		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
-	}
 }
 
 void UPuzzePlatformsGameInstance::Join(uint32 Index)
