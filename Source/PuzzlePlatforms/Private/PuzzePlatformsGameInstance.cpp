@@ -98,7 +98,15 @@ void UPuzzePlatformsGameInstance::CreateSession()
 	if (SessionInterface.IsValid())
 	{
 		FOnlineSessionSettings SessionSettings;
-		SessionSettings.bIsLANMatch = true;
+
+		if (IOnlineSubsystem::Get()->GetSubsystemName() == "NULL")
+		{
+			SessionSettings.bIsLANMatch = true;
+		}
+		else
+		{
+			SessionSettings.bIsLANMatch = false;
+		}
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
@@ -163,12 +171,18 @@ void UPuzzePlatformsGameInstance::OnFindSessionComplete(bool Succeded)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Finished finding Session"));
 
-			TArray<FString> ServerNames;
+			TArray<FServerData> ServerNames;
 
 			for (auto& SearchResult : SessionSearch->SearchResults) // iterates trhough the Sessions found
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Found Session Names: %s"), *SearchResult.GetSessionIdStr());
-				ServerNames.Add(SearchResult.GetSessionIdStr());
+
+				FServerData Data;
+				Data.Name = SearchResult.GetSessionIdStr();
+				Data.CurrentPlayers = SearchResult.Session.NumOpenPublicConnections;
+				Data.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
+				Data.HostUserName = SearchResult.Session.OwningUserName;
+				ServerNames.Add(Data);
 			}
 
 			_Menu->SetServerList(ServerNames);

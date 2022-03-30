@@ -53,7 +53,7 @@ void UMainMenu::HostServer()
 	}
 }
 
-void UMainMenu::SetServerList(TArray<FString> ServerNames)
+void UMainMenu::SetServerList(TArray<FServerData> ServerNames)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return;
@@ -65,13 +65,21 @@ void UMainMenu::SetServerList(TArray<FString> ServerNames)
 
 	uint32 i = 0;
 
-	for (const FString& ServerName : ServerNames)
+	for (const FServerData& ServerData : ServerNames)
 	{
 		UServerRow* Row = CreateWidget<UServerRow>(this, ServerRowClass);
 		if (!ensure(Row != nullptr)) return;
 
 		// Create a row with the server name/address
-		Row->ServerName->SetText(FText::FromString(ServerName));
+		Row->ServerName->SetText(FText::FromString(ServerData.Name));
+		// User's name
+		Row->HostUserName->SetText(FText::FromString(ServerData.HostUserName));
+		// current amount of players
+		Row->CurrentPlayers->SetText(FText::FromString(FString::Printf(TEXT("%d"),ServerData.CurrentPlayers)));
+		// Max number of players
+		Row->MaxPlayers->SetText(FText::FromString(FString::Printf(TEXT("%d"), ServerData.MaxPlayers)));
+
+
 
 		// gives each row an Index value
 		Row->Setup(this, i);
@@ -86,7 +94,19 @@ void UMainMenu::SelectIndex(uint32 Index)
 {
 	SelectedIndex = Index;
 
-	
+	UpdateChildren();
+}
+
+void UMainMenu::UpdateChildren()
+{
+	for (int32 i = 0; i < ServerList->GetChildrenCount(); ++i)
+	{
+		auto Row = Cast<UServerRow>(ServerList->GetChildAt(i));
+		if (Row != nullptr)
+		{
+			Row->Selected = (SelectedIndex.IsSet() && SelectedIndex.GetValue() == i);
+		}
+	}
 }
 
 void UMainMenu::JoinServer()
@@ -135,3 +155,5 @@ void UMainMenu::ExitGame()
 
 	PC->ConsoleCommand("Quit");
 }
+
+
