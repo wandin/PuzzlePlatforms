@@ -13,7 +13,7 @@
 #include "PuzzlePlatforms/MenuSystem/MenuWidget.h"
 
 
-const static FName SESSION_NAME = TEXT("My Session"); // declares the Session name, pretty obvious
+const static FName SESSION_NAME = TEXT("GameSession"); // declares the Session name, pretty obvious
 const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName"); // declaring a const server name
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
@@ -141,7 +141,7 @@ void UPuzzePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, boo
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	World->ServerTravel("/Game/PuzzlePlatforms/Maps/PuzzlePlatformLevel?listen");
+	World->ServerTravel("/Game/PuzzlePlatforms/Maps/Lobby?listen");
 }
 
 // After Destroy Session, creates a session.
