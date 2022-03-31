@@ -52,6 +52,12 @@ void UPuzzePlatformsGameInstance::Init()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found no Subsystem"));
 	}
+
+	if (GEngine != nullptr)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UPuzzePlatformsGameInstance::OnNetworkFailure);
+	}
+
 }
 
 void UPuzzePlatformsGameInstance::LoadMenu()
@@ -110,7 +116,7 @@ void UPuzzePlatformsGameInstance::CreateSession()
 		{
 			SessionSettings.bIsLANMatch = false;
 		}
-		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.NumPublicConnections = 4;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
@@ -217,6 +223,14 @@ void UPuzzePlatformsGameInstance::Join(uint32 Index)
 
 }
 
+void UPuzzePlatformsGameInstance::StartSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->StartSession(SESSION_NAME);
+	}
+}
+
 void UPuzzePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
 	if (!SessionInterface.IsValid()) return;
@@ -237,6 +251,12 @@ void UPuzzePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJo
 	if (!ensure(PC != nullptr)) return;
 
 	PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+}
+
+// Handles the game network failure, once the host quits all clients return to MainMenu;
+void UPuzzePlatformsGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	LoadMainMenu();
 }
 
 void UPuzzePlatformsGameInstance::LoadMainMenu()

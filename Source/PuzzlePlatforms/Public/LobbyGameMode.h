@@ -21,5 +21,9 @@ public:
 
 private:
 
+	void StartGame();
+
+	FTimerHandle GameStartCounter;
+
 	uint32 NumberOfPlayers = 0;
 };
