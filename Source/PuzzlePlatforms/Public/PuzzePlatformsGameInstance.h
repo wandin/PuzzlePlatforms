@@ -32,7 +32,7 @@ public:
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
-	void Host() override;
+	void Host(FString ServerName) override;
 
 	/* Adds a function that can be executable from the command line*/
 	UFUNCTION(Exec)
@@ -55,6 +55,8 @@ private:
 	void OnDestroySessionComplete(FName SessionName, bool Succeded);
 	void OnFindSessionComplete(bool Succeded);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	FString DesiredServerName;
 
 	void CreateSession();
 };

@@ -14,6 +14,7 @@
 
 
 const static FName SESSION_NAME = TEXT("My Session"); // declares the Session name, pretty obvious
+const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName"); // declaring a const server name
 
 UPuzzePlatformsGameInstance::UPuzzePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -76,8 +77,10 @@ void UPuzzePlatformsGameInstance::InGameLoadMenu()
 }
 
 // When pressing HostButton, creates a session(SESSION_NAME) "My Session", if a session already exists destroys the session and creates one
-void UPuzzePlatformsGameInstance::Host()
+void UPuzzePlatformsGameInstance::Host(FString ServerName)
 {
+	DesiredServerName = ServerName;
+
 	if (SessionInterface.IsValid()) //boolean
 	{
 		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
@@ -110,6 +113,7 @@ void UPuzzePlatformsGameInstance::CreateSession()
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
+		SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
@@ -173,15 +177,25 @@ void UPuzzePlatformsGameInstance::OnFindSessionComplete(bool Succeded)
 
 			TArray<FServerData> ServerNames;
 
-			for (auto& SearchResult : SessionSearch->SearchResults) // iterates trhough the Sessions found
+			for (auto& SearchResult : SessionSearch->SearchResults) // iterates through the Sessions found
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Found Session Names: %s"), *SearchResult.GetSessionIdStr());
 
 				FServerData Data;
 				Data.Name = SearchResult.GetSessionIdStr();
-				Data.CurrentPlayers = SearchResult.Session.NumOpenPublicConnections;
 				Data.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
+				Data.CurrentPlayers = Data.MaxPlayers - SearchResult.Session.NumOpenPublicConnections;
 				Data.HostUserName = SearchResult.Session.OwningUserName;
+
+				FString ServerName;
+				if (SearchResult.Session.SessionSettings.Get(SERVER_NAME_SETTINGS_KEY, ServerName))
+				{
+					Data.Name = ServerName;
+				}
+				else
+				{
+					Data.Name = "Could not find a server name input";
+				}
 				ServerNames.Add(Data);
 			}
 

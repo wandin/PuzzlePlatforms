@@ -25,10 +25,7 @@ public:
 	class UTextBlock* HostUserName;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* CurrentPlayers;
-
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* MaxPlayers;
+	class UTextBlock* ConnectionFraction;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool Selected = false;

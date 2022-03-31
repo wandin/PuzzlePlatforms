@@ -27,8 +27,11 @@ bool UMainMenu::Initialize()
 
 	if (!Success) return false;
 
-	if (!ensure(HostButton != nullptr)) return false;
-	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
+	if (!ensure(HostServerButton != nullptr)) return false;
+	HostServerButton->OnClicked.AddDynamic(this, &UMainMenu::OpenHostMenu);
+
+	if (!ensure(CancelHostMenuButton != nullptr)) return false;
+	CancelHostMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 
 	if (!ensure(JoinButton != nullptr)) return false;
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
@@ -38,6 +41,9 @@ bool UMainMenu::Initialize()
 
 	if (!ensure(CancelJoinMenuButton != nullptr)) return false;
 	CancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
+	if (!ensure(HostButton != nullptr)) return false;
+	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
 
 	if (!ensure(JoinGameButton != nullptr)) return false;
 	JoinGameButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
@@ -49,7 +55,8 @@ void UMainMenu::HostServer()
 {
 	if (MenuInterface != nullptr)
 	{
-		MenuInterface->Host();
+		FString ServerName = ServerNameBox->Text.ToString();
+		MenuInterface->Host(ServerName);
 	}
 }
 
@@ -75,9 +82,10 @@ void UMainMenu::SetServerList(TArray<FServerData> ServerNames)
 		// User's name
 		Row->HostUserName->SetText(FText::FromString(ServerData.HostUserName));
 		// current amount of players
-		Row->CurrentPlayers->SetText(FText::FromString(FString::Printf(TEXT("%d"),ServerData.CurrentPlayers)));
+		
 		// Max number of players
-		Row->MaxPlayers->SetText(FText::FromString(FString::Printf(TEXT("%d"), ServerData.MaxPlayers)));
+		FString FractionText = FString::Printf(TEXT("%d/%d"), ServerData.CurrentPlayers, ServerData.MaxPlayers);
+		Row->ConnectionFraction->SetText(FText::FromString(FractionText));
 
 
 
@@ -122,6 +130,14 @@ void UMainMenu::JoinServer()
 		UE_LOG(LogTemp, Warning, TEXT("Selected index: not set"));
 	}
 
+}
+
+void UMainMenu::OpenHostMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(HostMenu != nullptr)) return;
+
+	MenuSwitcher->SetActiveWidget(HostMenu);
 }
 
 void UMainMenu::OpenJoinMenu()

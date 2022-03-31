@@ -40,9 +40,11 @@ private:
 
 	TSubclassOf<class UUserWidget> ServerRowClass;
 
+
 	/* declaring Buttons on Widget created in UE*/
 	UPROPERTY(meta = (BindWidget))
-	class UButton* HostButton;
+	class UButton* HostServerButton;
+
 	/* declaring Buttons on Widget created in UE*/
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
@@ -61,10 +63,24 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
 
-	/* declaring the Main Menu, which will open using the WidgetSwitcher when the CancelJoinMenuButton is clicked*/
+	/* declaring the Main Menu, which will open in different circumstances*/
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* MainMenu;
 
+	/* declaring the Host Menu, which will open using the WidgetSwitcher when the Hostbutton is clicked*/
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* HostMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* ServerNameBox;
+
+	/* declaring Buttons on Widget created in UE*/
+	UPROPERTY(meta = (BindWidget))
+	class UButton* HostButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CancelHostMenuButton;
+	
 	/* declaring the Join Menu, which will open using the WidgetSwitcher when the Joinbutton is clicked*/
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* JoinMenu;
@@ -81,6 +97,9 @@ private:
 
 	UFUNCTION()
 	void JoinServer();
+
+	UFUNCTION()
+	void OpenHostMenu();
 
 	UFUNCTION()
 	void OpenJoinMenu();
